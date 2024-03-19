@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+<style>
+body {
+  margin: 0;
+  padding: 0 2px;
+}
+#copy_btn {
+  margin: 0;
+  margin-top: 90px;
+  width: 96px;
+  font-family: sans-serif;
+  font-size: 12px;
+  text-align: center;
+  word-break: break-word;
+}
+</style>
+<script>
+const copy_data = function() {
+  const doc_1 = parent.frames[0].document
+  const doc_2 = parent.frames[2].document
+
+  const img_1 = doc_1.getElementById("obfuscated_img")
+  const img_2 = doc_2.getElementById("obfuscated_img")
+
+  const txt_1 = doc_1.getElementById("obfuscated_json")
+  const txt_2 = doc_2.getElementById("obfuscated_json")
+
+  img_2.src   = img_1.src
+  txt_2.value = txt_1.textContent
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("copy_btn").addEventListener("click", copy_data)
+})
+</script>
+</head>
+<body>
+  <button id="copy_btn">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;<br>Copy Obfuscated Data<br>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</button>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<style>
+body {
+  background-color: ivory;
+  padding: 20px;
+}
+#obfuscated_img,
+#obfuscated_json {
+  border: 1px solid red;
+}
+#obfuscated_json {
+  font-family: monospace;
+  white-space: nowrap;
+
+  display: block;
+  width: 100%;
+  overflow: auto;
+}
+#restore_btn {
+  margin-top: 1em;
+}
+#original_img {
+  border: 1px solid blue;
+  pointer-events: none;
+}
+</style>
+<script>
+const options = {
+  timeout: 0
+}
+
+const init = function() {
+  options["$obfuscatedImage"] = document.getElementById("obfuscated_img")
+  options["$obfuscatedJSON"]  = document.getElementById("obfuscated_json")
+  options["$originalImage"]   = document.getElementById("original_img")
+
+  document.getElementById("restore_btn").addEventListener("click", function() {
+    if (options["$obfuscatedImage"].src && options["$obfuscatedJSON"].value)
+      start(options)
+  })
+}
+
+const start = async function(options) {
+  try {
+    const {$originalImage, $obfuscatedImage, $obfuscatedJSON} = options
+
+    prevent_events($originalImage, ['contextmenu', 'dragstart'])
+
+    const slices = JSON.parse($obfuscatedJSON.value)
+
+    $originalImage.src = await deobfuscate($obfuscatedImage, slices)
+
+    if (options.timeout) {
+      setTimeout(
+        function() {
+          $originalImage.src = options.src
+        },
+        options.timeout
+      )
+    }
+  }
+  catch(e) {
+    window.alert(e.message)
+  }
+}
+
+const prevent_events = function(el, events) {
+  const handler = function(e) {e.preventDefault()}
+
+  for (let event of events)
+    el.addEventListener(event, handler)
+}
+
+const deobfuscate = function($obfuscatedImage, slices) {
+  const tempCanvas = document.createElement("canvas")
+  const tempCtx = tempCanvas.getContext('2d')
+
+  tempCanvas.width  = $obfuscatedImage.width
+  tempCanvas.height = $obfuscatedImage.height
+
+  const verticalSlices   = slices.shift()
+  const horizontalSlices = slices.shift()
+  const sliceWidth       = tempCanvas.width  / verticalSlices
+  const sliceHeight      = tempCanvas.height / horizontalSlices
+
+  for (let i = 0; i < slices.length; i++) {
+    const s   = slices[i]
+    const row = parseInt(s / verticalSlices)
+    const col = s - (row * verticalSlices)
+    const x   = col * sliceWidth
+    const y   = row * sliceHeight
+
+    const canvasRow = parseInt(i / verticalSlices)
+    const canvasCol = i - (canvasRow * verticalSlices)
+    const canvasX   = canvasCol * sliceWidth
+    const canvasY   = canvasRow * sliceHeight
+
+    tempCtx.drawImage(
+      $obfuscatedImage,
+      canvasX, canvasY, sliceWidth, sliceHeight,
+      x, y, sliceWidth, sliceHeight
+    )
+  }
+
+  return new Promise((resolve) => {
+    tempCanvas.toBlob((blob) => {
+      resolve(
+        URL.createObjectURL(blob)
+      )
+    })
+  })
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  init()
+})
+</script>
+</head>
+<body>
+  <p>Image after scrambling</p>
+  <img id="obfuscated_img" />
+  <hr />
+  <p>Randomized data needed to unscramble the image</p>
+  <textarea id="obfuscated_json"></textarea>
+  <button id="restore_btn">Restore</button>
+  <hr />
+  <p>Image after restoration</p>
+  <img id="original_img" />
+</body>
+</html>

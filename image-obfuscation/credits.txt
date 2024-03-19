@@ -1,0 +1,10 @@
+https://stackoverflow.com/questions/20973528/canvas-disable-image-download
+
+https://stackoverflow.com/a/20985155
+  the basis for this demo
+
+http://jsfiddle.net/m1erickson/wWbt5/
+  image obfuscation
+
+http://jsfiddle.net/m1erickson/UtN6g/
+  image restoration
